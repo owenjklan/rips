@@ -44,10 +44,32 @@ def random_ip_in_network(network):
 @click.command()
 @click.argument('src_nets', type=click.File("r"))
 @click.argument('dst_nets', type=click.File("r"))
-@click.option('--port', '-p', 'ports', type=int, multiple=True, default=[443])
-@click.option('--count', '-c', 'count', type=int, default=100)
+@click.option('--port', '-p', 'ports', type=int, multiple=True, default=[443],
+              help=("Add port to list of 'server ports' to choose from."))
+@click.option('--count', '-c', 'count', type=int, default=100,
+              help=("Specify number of flows to generate."))
 # @click.option('--random-cap', '-r', 'random_cap', type=int, default=0)
 def main(src_nets, dst_nets, ports, count):
+    """
+    Random IPs - Within network ranges
+
+    When supplied with two files, containing lists of networks, specified
+    as A.B.C.D/CIDR, will generate upto 'count' IP flows, "From" a random
+    network in the source networks, "To" a random network in the destination
+    networks. Each time a flow is created there is a 1-in-3 chance that
+    an existing flow will be taken from those already generated and the
+    source and destination information will be swapped, simulating response
+    traffic.
+
+    Note: It is quite possible the randomly selected flow was the result of
+    being randomly selected as well. This would result in a "double-swap" of
+    sorts. That's fine. In _theory_ (totally unproven, btw) this will add
+    some random weighting to request vs. response traffic.
+
+    Additional ports can be specified for selection as the source. The idea
+    is to use common service port numbers, like 443. This can be specified
+    multiple times.
+    """
     result_set = []
 
     source_networks = [s.split('#')[0].strip() for s in src_nets.readlines()]
